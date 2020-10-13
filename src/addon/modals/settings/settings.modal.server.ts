@@ -4,7 +4,7 @@ import {ProjectSettings} from '../../../lib/types/addon.type';
 
 export function settingsModal() {
   return SpreadsheetApp.getUi().showModalDialog(
-    HtmlService.createHtmlOutputFromFile('SettingsSidebar')
+    HtmlService.createHtmlOutputFromFile('SettingsModal')
       .setWidth(720)
       .setHeight(480),
     'Settings'
