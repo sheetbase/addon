@@ -3,10 +3,179 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Html-editor</title>
+  <title>Html Editor</title>
   <base target="_blank">
+  <link rel="stylesheet" href="https://sheetbase.github.io/sheets-addon_v1/css/addon.css">
+  <link rel="stylesheet" href="https://sheetbase.github.io/sheets-addon_v1/css/add-ons1.css">
 </head>
 <body>
-  <p>Content here.</p>
+  <div class="container">
+
+    <main>
+
+      <textarea class="master" id="tinymce"></textarea>
+
+      <div id="vue" v-cloak>
+
+        <!-- 1st -->
+        <section class="alpha">
+
+          <div class="advanced">
+
+            <div class="settings">
+
+              <div class="set-modes">
+                <button class="button toggle mode raw"
+                  title="Set as json string"
+                  :class="{'active': setMode==='RAW'}"
+                  :disabled="!!source && !modeCurrentDisabled"
+                  @click="setMode='RAW'"
+                >
+                  <img src="https://img.icons8.com/small/16/000000/html-filetype.png">
+                </button>
+                <button class="button toggle mode current"
+                  title="Save to current source"
+                  :class="{'active': setMode==='CURRENT'}"
+                  :disabled="modeCurrentDisabled"
+                  @click="setMode='CURRENT'"
+                >
+                  <img src="https://img.icons8.com/ios/16/000000/star.png">
+                </button>
+                <button class="button toggle mode new-internal"
+                  title="Save to new file on Drive"
+                  :class="{'active': setMode==='NEW_INTERNAL'}"
+                  @click="setMode='NEW_INTERNAL'"
+                >
+                  <img src="https://img.icons8.com/ios/16/000000/google-drive.png">
+                </button>
+                <button class="button toggle mode new-external"
+                  title="Save to new file externaly"
+                  :class="{'active': setMode==='NEW_EXTERNAL'}"
+                  :disabled="!hasWebHook"
+                  @click="setMode='NEW_EXTERNAL'"
+                >
+                  <img src="https://img.icons8.com/small/16/000000/network-drive.png">
+                </button>
+              </div>
+  
+              <div class="auto-loaded" v-if="setMode!=='RAW'">
+                <label class="label">
+                  <input class="input" type="checkbox" v-model="autoLoaded">
+                  <span>Auto-loaded</span>
+                </label>
+              </div>
+
+            </div>
+
+            <div class="source" v-if="!!source">
+              <code><a :href="viewUrl" :title="sourceUrl">{{ source }}</a></code>
+              <a class="clear" href="#"
+                title="Remove the source"
+                @click.prevent="setEditorData({}, true)"
+              >&times;</a>
+            </div>
+              
+          </div>
+  
+          <div class="buttons">
+            <button class="button" @click="getHTML()">Get &rarr;</button>
+            <button class="button" @click="clearHTML()">Clear</button>
+            <button class="button action right"
+              :disabled="actionDisabled"
+              @click="setHTML()"
+            >{{ setMode === 'RAW' ? '&larr; Set' : actionText() }}</button>
+          </div>
+  
+        </section>
+        
+        <!-- 2nd -->
+        <section class="bravo">
+
+          <div class="shell loader" :class="{'collapsed': !showLoader}">
+            <div class="head">
+              <div class="title" @click="showLoader=!showLoader">Content loader</div>
+              <a class="toggler" href="#"
+                @click.prevent="showLoader=!showLoader"
+              >{{ !showLoader ? 'Show' : 'Hide' }}</a>
+            </div>
+            <div class="body" v-if="!!showLoader">
+
+              <div class="inputs">
+      
+                <input class="input" type="text" placeholder="A Google Docs document id ..." v-model="docId">
+      
+                <div class="keep-style">
+                  <label class="label">
+                    <input class="input" type="checkbox" v-model="docStyle">
+                    <span>Keep Docs style</span>
+                  </label>
+                </div>
+        
+              </div>
+        
+              <div class="margin-top">
+                <button class="button action" :disabled="!docId" v-on:click="loadDocContent()">Load</button>
+                <button class="button right" :disabled="!docId" v-on:click="viewDoc()">View</button>
+              </div>
+
+            </div>
+          </div>
+  
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/tinymce.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/themes/silver/theme.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/advlist/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/anchor/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/autolink/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/autoresize/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/autosave/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/charmap/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/code/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/codesample/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/colorpicker/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/contextmenu/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/directionality/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/emoticons/js/emojis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/emoticons/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/fullpage/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/fullscreen/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/help/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/hr/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/image/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/imagetools/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/importcss/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/insertdatetime/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/legacyoutput/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/link/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/lists/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/media/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/nonbreaking/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/noneditable/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/pagebreak/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/paste/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/preview/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/print/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/quickbars/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/save/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/searchreplace/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/spellchecker/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/tabfocus/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/table/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/template/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/textcolor/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/textpattern/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/toc/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/visualblocks/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/visualchars/plugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/plugins/wordcount/plugin.min.js"></script>
+  <script src="https://sheetbase.github.io/sheets-addon_v1/js/addon.js"></script>
 </body>
 </html>

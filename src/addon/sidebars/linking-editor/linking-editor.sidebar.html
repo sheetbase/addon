@@ -3,10 +3,196 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Linking-editor</title>
+  <title>Linking Editor</title>
   <base target="_blank">
+  <link rel="stylesheet" href="https://sheetbase.github.io/sheets-addon_v1/css/addon.css">
+  <link rel="stylesheet" href="https://sheetbase.github.io/sheets-addon_v1/css/add-ons1.css">
 </head>
 <body>
-  <p>Content here.</p>
+  <div class="container" id="vue" v-cloak>
+
+    <div class="loading" v-if="!ready"></div>
+
+    <main v-else>
+
+      <section class="master shell" id="linking-editor">
+  
+        <div class="head">
+          
+          <div class="source">
+  
+            <select class="select" title="Select a linking source"
+              v-model="selectedSource"
+              @change="changeSource()"
+            >
+              <option class="option" value="" disabled hidden>Select a source</option>
+              <option class="option"
+                v-for="value in sources"
+                :value="value"
+                :selected="selectedSource===value"
+              >{{ value }}</option>
+            </select>
+            
+          </div>
+  
+          <div class="filter">
+            <input class="input" type="text"
+              placeholder="Filter items ..."
+              v-model="filter"
+            >
+            <button class="button only-selected toggle"
+              title="Show selected items only"
+              :class="{'active': !!showSelectedOnly}"
+              @click="showSelectedOnly=!showSelectedOnly"
+            >
+              <img src="https://img.icons8.com/ios/16/000000/check-file.png">
+            </button>
+            <button :class="['button', 'layout', 'active', 'toggle', layout]"
+              title="Display items with list or thumbnail layout"
+              @click="layout=(layout==='list' ? 'thumbnail' : 'list')"
+            >
+              <img :src="layout==='list' ? 'https://img.icons8.com/ios/16/000000/bulleted-list.png' : 'https://img.icons8.com/ios/16/000000/image.png'">
+            </button>
+          </div>
+  
+        </div>
+  
+        <div class="body">
+
+          <div class="filter-warning" v-if="!!showSelectedOnly || !!filter">
+            <div class="msg">Displayed item list is being filtered.</div>
+            <a href="#" @click.prevent="showSelectedOnly=false; filter='';">Clear</a>
+          </div>
+  
+          <div class="items-header" v-if="!!crossedItems">Native</div>
+          <ul class="items" v-if="!!crossedItems">
+            <li class="item"
+              v-for="item in getCrossedItemList()"
+              :class="{'active': !item.excluded}"
+              @click="selectCrossedItem(item.$key)"
+            >
+              <div class="info">
+                <h3 class="title">{{ item.title || item.$key }}</h3>
+              </div>
+            </li>
+          </ul>
+          
+          <div class="items-header" v-if="!!crossedItems">Items</div>
+          <div class="padding secondary" v-if="!selectedSource">
+            Please select a source from the top left selection.
+          </div>
+          <ul :class="['items', layout]" v-else>
+            <li class="item"
+              v-for="item in items"
+              :class="{
+                'active': !!isItemSelected(item),
+                'not-visible': !isItemVisible(item)
+              }"
+              @click="selectItem(item)"
+            >
+  
+              <div class="thumbnail">
+                <img :src="item.thumbnail || item.avatar || 'https://via.placeholder.com/300/d9d9d9?text=?'">
+              </div>
+  
+              <div class="info">
+                <h3 class="title">{{ item.title || item.displayName || item.$key }}</h3>
+                <p class="description">{{ item.excerpt || item.description || ('#' + item['#']) }}</p>
+              </div>
+  
+            </li>
+          </ul>
+  
+        </div>
+  
+        <div class="foot">
+  
+          <div class="linking-modes">
+
+            <div class="modes">
+              <button class="button mode text toggle"
+                title="Use mode TEXT for linking data"
+                :class="{'active': mode === 'text'}"
+                @click="mode='text'"
+              >
+                <img src="https://img.icons8.com/ios/16/000000/text-color.png">
+              </button>
+              <button class="button mode key toggle"
+                title="Use mode KEY for linking data"
+                :class="{'active': mode === 'key'}"
+                @click="mode='key'"
+              >
+                <img src="https://img.icons8.com/ios/16/000000/us-dollar--v1.png">
+              </button>
+              <button class="button mode title toggle"
+                title="Use mode TITLE for linking data"
+                :class="{'active': mode === 'title'}"
+                @click="mode='title'"
+              >
+                <img src="https://img.icons8.com/ios/16/000000/header-1--v1.png">
+              </button>
+              <button class="button mode custom toggle"
+                title="Use mode CUSTOM for linking data"
+                :class="{'active': mode === 'custom'}"
+                @click="mode='custom'"
+              >
+                <img src="https://img.icons8.com/ios/16/000000/ellipsis.png">
+              </button>
+            </div>
+  
+            <div class="custom-fields" v-if="mode==='custom'">
+              <input class="input" type="text"
+                placeholder="field1 field2 ..."
+                v-model="customFields"
+              >
+            </div>
+  
+            <div class="extra" v-if="mode!=='text'">
+              <label class="label including-source">
+                <input class="input" type="checkbox" v-model="includingSource">
+                <span>Including source</span>
+              </label>
+            </div>
+
+          </div>
+  
+          <div class="status">
+            <span><strong>{{ selectedCount() }}</strong> selected</span>
+            <span><strong>{{ totalCount() }}</strong> total</span>
+          </div>
+  
+        </div>
+  
+      </section>
+
+      <!-- 1st -->
+      <section class="alpha">
+  
+        <div class="margin-top">
+          <button class="button" @click="getData()">Get &rarr;</button>
+          <button class="button" @click="clearData()">Clear</button>
+          <button class="button action right" @click="setData()">&larr; Set</button>
+        </div>
+
+      </section>
+
+      <!-- 2nd -->
+      <section class="bravo">
+        
+        <fieldset class="fieldset preview">
+          <legend class="legend">Preview:</legend>
+          <div class="content">
+            <pre><code>{{ getResultAsString(true) || 'Please select at least one item.' }}</code></pre>
+          </div>
+        </fieldset>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>
+  <script src="https://sheetbase.github.io/sheets-addon_v1/js/addon.js"></script>
 </body>
 </html>

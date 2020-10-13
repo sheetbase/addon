@@ -1,6 +1,11 @@
 import Vue from 'vue';
 
-import {ErrorAlert, Google, ActionMessage, ProjectSettings} from '../../../lib/types/addon.type';
+import {
+  ErrorAlert,
+  Google,
+  ActionMessage,
+  ProjectSettings,
+} from '../../../lib/types/addon.type';
 
 declare const google: Google;
 declare const errorAlert: ErrorAlert;
@@ -12,7 +17,7 @@ const app = new Vue({
     ready: false,
     page: 'general',
     settings: {} as ProjectSettings,
-    actionMessage: null as ActionMessage,
+    actionMessage: undefined as undefined | ActionMessage,
   },
 
   created() {
@@ -34,7 +39,7 @@ const app = new Vue({
 
     setSettings() {
       const successHandler = () => {
-        setTimeout(() => (this.actionMessage = null), 3000);
+        setTimeout(() => (this.actionMessage = undefined), 3000);
         return (this.actionMessage = {
           type: 'success',
           message: 'Setting updated!',
