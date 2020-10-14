@@ -14,8 +14,8 @@
   ],
   "scripts": {
     "compile": "tsc",
-    "build": "workspace-addon-scripts build",
-    "push": "workspace-addon-scripts push",
+    "build": "seminjecto-workspace-scripts build",
+    "push": "seminjecto-workspace-scripts push",
     "docs": "ayedocs generate",
     "test": "npm run compile && nyc --cache false mocha test/**/*.js",
     "coverage": "nyc --cache false report --reporter=text-lcov | coveralls",
@@ -35,7 +35,7 @@
     "vue": "^2.6.12"
   },
   "devDependencies": {
-    "@lamnhan/workspace-addon-scripts": "^1.0.2",
+    "@lamnhan/seminjecto-workspace-scripts": "^1.0.3",
     "@types/google-apps-script": "^1.0.16",
     "@types/chai": "^4.2.13",
     "@types/jsoneditor": "^8.6.0",
