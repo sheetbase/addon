@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "skipLibCheck": true,
-    "lib": ["DOM"]
+    "lib": ["ESNext", "DOM"]
   },
   "include": [
     "src/**/*.ts",
