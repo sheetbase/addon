@@ -6,7 +6,7 @@
   "homepage": "https://sheetbase.dev",
   "license": "MIT",
   "main": "src/public-api.js",
-  "typings": "src/public-api.d.ts",
+  "types": "src/public-api.d.ts",
   "files": [
     "src",
     "!**/*.ts",
@@ -15,7 +15,7 @@
   "scripts": {
     "compile": "tsc",
     "build": "seminjecto-workspace-scripts build",
-    "push": "seminjecto-workspace-scripts push",
+    "deploy": "seminjecto-workspace-scripts deploy",
     "docs": "ayedocs generate",
     "test": "npm run compile && nyc --cache false mocha test/**/*.js",
     "coverage": "nyc --cache false report --reporter=text-lcov | coveralls",
@@ -35,7 +35,7 @@
     "vue": "^2.6.12"
   },
   "devDependencies": {
-    "@lamnhan/seminjecto-workspace-scripts": "^1.0.4",
+    "@lamnhan/seminjecto-workspace-scripts": "^1.0.5",
     "@types/google-apps-script": "^1.0.16",
     "@types/chai": "^4.2.13",
     "@types/jsoneditor": "^8.6.0",
